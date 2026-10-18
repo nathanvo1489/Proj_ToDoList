@@ -2,19 +2,17 @@ FROM node:24-alpine AS builder
 
 WORKDIR /app
 
-# tải thư viện
-COPY package-lock.json .
-COPY package.json .
+COPY package*.json ./
 RUN npm install
 
-# build
 COPY . .
-# build vào folder dist
 RUN npm run build
 
 FROM nginx:alpine
 
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/build /usr/share/nginx/html
 
-# docker build -t reactjs_fe_image .
-# docker run --name reactjs_fe_container -d -p 3001:80 reactjs_fe_image
+EXPOSE 3001
+
+# docker build -t js_react_fe_image .
+# docker run --name js_react_fe_container -d -p 3001:80 js_react_fe_image

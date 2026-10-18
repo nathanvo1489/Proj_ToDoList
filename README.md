@@ -1,2 +1,2 @@
-# Proj_ToDoList
+# Proj_ToDoList: MERN
 Project To-Do-List

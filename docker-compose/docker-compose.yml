@@ -1,111 +1,65 @@
 services:
-  # docker run --name database -d -v postgres_data_volume:/var/lib/postgresql -e POSTGRES_PASSWORD=12345 -p 5432:5432 postgres:18
-  database:
-    image: postgres:18
-    container_name: database
+  # docker run --name mongodb -d -v ../mongo_data:/data/db -e MONGO_INITDB_ROOT_USERNAME=root -e MONGO_INITDB_ROOT_PASSWORD=12345 -p 27017:27017 mongo:latest
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
     ports:
-      - 5432:5432
+      - 27017:27017
     volumes:
-      - ./postgres_data:/var/lib/postgresql
+      - ../mongo_data:/data/db
     environment:
-      - POSTGRES_PASSWORD=12345
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=12345
 
-  # docker run --name go_gin_be_container -d -p 8002:8080 --env-file=.env go_gin_be_image
-  go_gin_be:
+  # docker run --name js_express_be_container -d -p 8000:8001 --env-file=.env js_express_be_image
+  js_express_be:
     build:
-      context: ../go_gin_be
+      context: ../backend
       dockerfile: Dockerfile
-    image: go_gin_be_image
-    container_name: go_gin_be
+    image: js_express_be_image
+    container_name: js_express_be
     ports:
-      - 8002:8080
+      - 8000:8001
     env_file:
-      - ../go_gin_be/.env
+      - ../backend/.env
     depends_on:
-      - database
+      - mongodb
 
-  # docker run --name java_be_container -d -p 8003:8080 --env-file=.env java_be_image
-  java_be:
+  # docker run --name js_react_fe_container -d -p 3001:80 js_react_fe_image
+  js_react_fe:
     build:
-      context: ../java_be
+      context: ../frontend
       dockerfile: Dockerfile
-    image: java_be_image
-    container_name: java_be
+    image: js_react_fe_image
+    container_name: js_react_fe
     ports:
-      - 8003:8080
-    env_file:
-      - ../java_be/.env
+      - 3001:80
+    # env_file:
+    #   - ../frontend/.env
     depends_on:
-      - database
+      - js_express_be
 
-  # docker run --name js_nestjs_container -d -p 8004:3000 --env-file=.env js_nestjs_image
-  js_nestjs:
-    build:
-      context: ../js_nestjs
-      dockerfile: Dockerfile
-    image: js_nestjs_image
-    container_name: js_nestjs
-    ports:
-      - 8004:3000
-    env_file:
-      - ../js_nestjs/.env
-    depends_on:
-      - database
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   container_name: prometheus
+  #   ports:
+  #     - 9090:9090
+  #   volumes:
+  #     - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
 
-  # docker run --name csharp_be_container -d -p 8001:8080 --env-file=.env csharp_be_image
-  csharp_be:
-    build:
-      context: ../csharp_be
-      dockerfile: Dockerfile
-    image: csharp_be_image
-    container_name: csharp_be
-    ports:
-      - 8005:8080
-    env_file:
-      - ../csharp_be/.env
-    depends_on:
-      - database
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: grafana
+  #   ports:
+  #     - 3001:3000
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
+  #   environment:
+  #     - GF_SECURITY_ADMIN_USER=admin
+  #     - GF_SECURITY_ADMIN_PASSWORD=12345
 
-  # docker run --name my-app-container -d -p 12345:3000 --network demo_network vulebaolong/my-app-image
-  js_nextjs:
-    # build:
-    #   context: ../js_nextjs
-    #   dockerfile: Dockerfile
+volumes:
+  mongo_data:
+    name: mongo_data
+  # grafana_data:
 
-    # Build Image via Docker Hub
-    # image: nathanvo1489/js_nextjs_image:latest
-
-    # Build Image via Jenkins
-    image: js_nextjs_image:latest
-
-    # image: vulebaolong/my-app-image sai chip
-    container_name: js_nextjs
-    ports:
-      - 3001:3000
-
-  # docker run --name html_container -d -p 3000:80 html_image
-  html:
-    build:
-      context: ../html
-      dockerfile: Dockerfile
-    image: html_image
-    container_name: html
-    ports:
-      - 3002:80
-
-  # docker run --name js_react_vite_container -d -p 3001:80 js_react_vite_image
-  js_react_vite:
-    build:
-      context: ../html
-      dockerfile: Dockerfile
-    image: js_react_vite_image
-    container_name: js_react_vite
-    ports:
-      - 3003:80
-
-# volumes:
-#   postgres-data:
-
-# networks:
-#   demo_network:
-#     external: true

@@ -1,30 +1,32 @@
-FROM node:24-alpine AS dependencies
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install 
-# --omit=dev --no-audit --no-fund
+RUN npm install --omit=dev --no-audit --no-fund
 
-# build
 COPY . .
-# sẽ build vào folder dist
-RUN npm run build
 
 FROM node:24-alpine
 
 WORKDIR /app
 
-COPY --from=dependencies --chown=node:node /app/node_modules ./node_modules
-COPY --chown=node:node . .
+ENV NODE_ENV=production
 
-COPY --from=dependencies /app/dist ./dist
-COPY --from=dependencies /app/node_modules ./node_modules
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+
+COPY server.js ./server.js
+COPY controllers ./controllers
+COPY middleware ./middleware
+COPY models ./models
+COPY routes ./routes
+COPY scheduler ./scheduler
 
 USER node
 EXPOSE 8001
 
 CMD ["node", "server.js"]
 
-# docker build -t reactjs_image .
-# docker run --name reactjs_container -d -p 8001:3000 --env-file=.env reactjs_image
+# docker build -t js_express_be_image .
+# docker run --name js_express_be_container -d -p 8000:8001 --env-file=.env js_express_be_image
