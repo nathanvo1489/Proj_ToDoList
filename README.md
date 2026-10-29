@@ -45,6 +45,6 @@ example from teacher:
 
 CICD workflow in github action
 
-** chua gan IP cloudflare cho FE & BE, chua add domain nginx cho FE & BE **
+** chua gan IP cloudflare cho FE & BE, chua add domain nginx cho FE & BE **             
 
 3- server monitoring

@@ -20,15 +20,16 @@ services:
 
   # docker run --name js_express_be_container -d -p 8000:8001 --env-file=.env js_express_be_image
   js_express_be:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
-    image: js_express_be_image
+    # build:
+    #   context: ../backend
+    #   dockerfile: Dockerfile
+    #---Must build with username in order to push to DockerHub---#
+    image: nathanvo1489/js_express_be_image:latest
     container_name: js_express_be
     ports:
       - 8000:8001
     env_file:
-      - ../backend/.env
+      - ../.env
     depends_on:
       # mongodb must be healthy before starting the backend service
       mongodb:

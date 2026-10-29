@@ -33,5 +33,5 @@ yarn-error.log*
 /ansible/files/nathan-vo.com*
 /ansible/inventory.ini
 
-# database
-
+# script
+script-combined.groovy
