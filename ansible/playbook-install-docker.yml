@@ -38,13 +38,14 @@
                 - runc
             state: absent
 
-      # 3. Install prerequisites
+      # 3. Install prerequisites (including Github CLI)
       - name: Install required packages
         ansible.builtin.apt:
             name:
                 - ca-certificates
                 - curl
                 - python3-debian
+                - gh
             state: present
             update_cache: true
 
