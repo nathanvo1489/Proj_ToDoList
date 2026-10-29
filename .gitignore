@@ -23,4 +23,15 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# infrastructure
+/terraform/create-ec2/.terraform/
+/terraform/create-ec2/.terraform.lock.hcl
+/terraform/create-ec2/terraform.tfstate*
+/terraform/terraform_1.16.6_linux_386/
+
+/ansible/devops.pem
+/ansible/files/nathan-vo.com*
+/ansible/inventory.ini
+
 # database
+
