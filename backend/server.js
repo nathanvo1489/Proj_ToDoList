@@ -17,6 +17,11 @@ mongoose.set('strictQuery', true);
 app.use(express.json())
 app.use(cors())
 
+//a response to see if Backend is running
+app.get("/", (req, res) => {
+    res.send("Backend is running")
+})
+
 //db config
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,

@@ -7,7 +7,6 @@ services:
       - 27017:27017
     volumes:
       - mongo_data:/data/db
-      # - mongo_config:/data/configdb
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=12345
@@ -37,15 +36,14 @@ services:
 
   # docker run --name js_react_fe_container -d -p 3001:80 js_react_fe_image
   js_react_fe:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
-    image: js_react_fe_image
+    # build:
+    #   context: ../frontend
+    #   dockerfile: Dockerfile
+    #---Must build with username in order to push to DockerHub---#
+    image: nathanvo1489/js_react_fe_image:latest
     container_name: js_react_fe
     ports:
       - 3001:80
-    # env_file:
-    #   - ../frontend/.env
     depends_on:
       - js_express_be
 

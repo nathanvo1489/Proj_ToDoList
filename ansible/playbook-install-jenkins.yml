@@ -1,0 +1,117 @@
+- name: Install and configure Jenkins
+  hosts: jenkins_server
+  become: true
+
+  tasks:
+      # 1.Install the Java runtime and the packages required for Jenkins to use the Debian package manager correctly.
+      - name: Install Java and Jenkins APT prerequisites
+        ansible.builtin.apt:
+            name:
+                - ca-certificates
+                - fontconfig
+                - openjdk-21-jre
+                - python3-apt
+            state: present
+            update_cache: true
+
+      # 2.Confirm Java is available before adding the Jenkins repository and installing the package.
+      - name: Verify Java installation
+        ansible.builtin.command:
+            cmd: java -version
+        changed_when: false
+
+      # 3.Create the directory that stores trusted APT signing keys for repository verification.
+      - name: Ensure APT keyrings directory exists
+        ansible.builtin.file:
+            path: /etc/apt/keyrings
+            state: directory
+            mode: "0755"
+
+      # 4.Download the public key used to sign the Jenkins Debian packages.
+      - name: Download Jenkins repository signing key
+        ansible.builtin.get_url:
+            url: https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+            dest: /etc/apt/keyrings/jenkins-keyring.asc
+            mode: "0644"
+
+      # 5.Register the Jenkins stable repository so apt can find and install Jenkins packages.
+      - name: Add Jenkins APT repository
+        ansible.builtin.apt_repository:
+            repo: "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/"
+            filename: jenkins
+            state: present
+            update_cache: true
+
+      # 6.Install the Jenkins LTS package from the newly added repository.
+      - name: Install Jenkins LTS
+        ansible.builtin.apt:
+            name: jenkins
+            state: present
+
+      # 7.Stop Jenkins before applying custom service configuration to avoid conflicts during startup.
+      - name: Stop Jenkins before configuration
+        ansible.builtin.service:
+            name: jenkins
+            state: stopped
+
+      # 8.Add the Jenkins system user to the Docker group so it can interact with Docker-based workloads.
+      - name: Add Jenkins user to the Docker group
+        ansible.builtin.user:
+            name: jenkins
+            groups: docker
+            append: true
+
+      # 9.Create the directory used for systemd drop-in overrides on Jenkins.
+      - name: Ensure Jenkins systemd override directory exists
+        ansible.builtin.file:
+            path: /etc/systemd/system/jenkins.service.d
+            state: directory
+            mode: "0755"
+
+      # 10.Override the systemd environment for Jenkins with the required Java and plugin cache settings.
+      - name: Configure Jenkins systemd environment options
+        ansible.builtin.copy:
+            dest: /etc/systemd/system/jenkins.service.d/override.conf
+            content: |
+                [Service]
+                Environment="JAVA_OPTS=-Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Djava.io.tmpdir=/var/cache/jenkins/tmp/"
+                Environment="JENKINS_OPTS=--pluginroot=/var/cache/jenkins/plugins"
+            owner: root
+            group: root
+            mode: "0644"
+
+      # 11.Create a writable temporary directory for Jenkins so its Java process can use the configured cache path.
+      - name: Create Jenkins temporary cache directory
+        ansible.builtin.file:
+            path: /var/cache/jenkins/tmp
+            state: directory
+            owner: jenkins
+            group: jenkins
+            recurse: true
+
+      # 12.Create a dedicated plugin cache directory to store Jenkins plugin data under the required path.
+      - name: Create Jenkins plugin cache directory
+        ansible.builtin.file:
+            path: /var/cache/jenkins/plugins
+            state: directory
+            owner: jenkins
+            group: jenkins
+            recurse: true
+
+      # 13.Validate that the Jenkins service configuration is syntactically correct before reloading the daemon.
+      - name: Verify Jenkins systemd configuration
+        ansible.builtin.command:
+            cmd: systemd-analyze verify jenkins.service
+        changed_when: false
+
+      # 14.Reload systemd so the Jenkins service override is picked up by the init system.
+      - name: Reload systemd manager configuration
+        ansible.builtin.systemd:
+            daemon_reload: true
+
+      # 15.Start Jenkins and enable it at boot so the service remains available after server restarts.
+      - name: Ensure Jenkins is started and enabled
+        ansible.builtin.service:
+            name: jenkins
+            state: started
+            enabled: true

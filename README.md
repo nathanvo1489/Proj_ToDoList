@@ -25,3 +25,26 @@ The frontend Axios requests run in the browser and use the host-published backen
 The API routes are mounted under `/api`: `/api/user`, `/api/task`, and `/api/forgotPassword`.
 
 
+1- server run
+t3.small
+install docker, nginx
+Only need docker compose & .env file
+
+2- server build
+t3.medium
+install docker, nginx, Jenkins
+add nginx domain for backend, frontend (cloudflare map in 2 server run), Jenkins (cloudflare map 1 server build)
+pull all the sources from github
+
+example from teacher:
+	go-be: built in github, move img to server run (docker save|load)
+	js-next-fe: built in github, push img to dockerhub, 
+
+	server build is used to push img to dockerhub
+..and we have to pull img from dockerhub to server run <- require login
+
+CICD workflow in github action
+
+** chua gan IP cloudflare cho FE & BE, chua add domain nginx cho FE & BE **
+
+3- server monitoring

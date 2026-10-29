@@ -1,0 +1,115 @@
+- name: Install Docker Engine
+  hosts: myhosts
+  become: true
+
+  tasks:
+      # 1. Avoid the out-of-sync regional Ubuntu mirror
+      - name: Find Ubuntu APT source files
+        ansible.builtin.find:
+            paths: /etc/apt
+            patterns:
+                - sources.list
+                - "*.list"
+                - "*.sources"
+            recurse: true
+            file_type: file
+        register: ubuntu_apt_sources
+
+      - name: Switch from the regional Ubuntu mirror
+        ansible.builtin.replace:
+            path: "{{ item.path }}"
+            regexp: "ap-southeast-1\\.ec2\\.archive\\.ubuntu\\.com"
+            replace: "archive.ubuntu.com"
+        loop: "{{ ubuntu_apt_sources.files }}"
+        loop_control:
+            label: "{{ item.path }}"
+
+      # 2. Remove conflicting packages
+      - name: Remove conflicting packages
+        ansible.builtin.apt:
+            name:
+                - docker.io
+                - docker-compose
+                - docker-compose-v2
+                - docker-doc
+                - docker-buildx
+                - podman-docker
+                - containerd
+                - runc
+            state: absent
+
+      # 3. Install prerequisites
+      - name: Install required packages
+        ansible.builtin.apt:
+            name:
+                - ca-certificates
+                - curl
+                - python3-debian
+            state: present
+            update_cache: true
+
+      # 4. Create keyrings directory
+      - name: Create APT keyrings directory
+        ansible.builtin.file:
+            path: /etc/apt/keyrings
+            state: directory
+            mode: "0755"
+
+      # 5. Add Docker GPG key
+      - name: Download Docker GPG key
+        ansible.builtin.get_url:
+            url: https://download.docker.com/linux/ubuntu/gpg
+            dest: /etc/apt/keyrings/docker.asc
+            mode: "0644"
+
+      # 6. Add Docker official repository
+      - name: Add Docker APT repository
+        ansible.builtin.deb822_repository:
+            name: docker
+            types: 
+                - deb
+            uris: https://download.docker.com/linux/ubuntu
+            suites:
+                - "{{ ansible_distribution_release }}"
+            components:
+                - stable
+            architectures:
+                - amd64
+            signed_by: /etc/apt/keyrings/docker.asc
+            state: present
+
+      # 7. Update apt cache
+      - name: Update APT cache
+        ansible.builtin.apt:
+            update_cache: true
+
+      # 8. Install Docker
+      - name: Install Docker packages
+        ansible.builtin.apt:
+            name:
+                - docker-ce
+                - docker-ce-cli
+                - containerd.io
+                - docker-buildx-plugin
+                - docker-compose-plugin
+            state: present
+
+      # 9. Ensure Docker is running
+      - name: Ensure Docker service is running
+        ansible.builtin.service:
+            name: docker
+            state: started
+            enabled: true
+
+      # 10. Allow ubuntu to use Docker
+      - name: Add ubuntu user to docker group
+        ansible.builtin.user:
+            name: ubuntu
+            groups: docker
+            append: true
+
+      # 11. Verify
+      - name: Verify Docker installation
+        ansible.builtin.command:
+            cmd: docker ps
+        changed_when: false
