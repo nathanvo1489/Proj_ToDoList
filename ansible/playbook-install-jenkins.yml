@@ -46,7 +46,7 @@
       - name: Install Jenkins LTS
         ansible.builtin.apt:
             name: jenkins
-            state: present
+            state: latest
 
       # 7.Stop Jenkins before applying custom service configuration to avoid conflicts during startup.
       - name: Stop Jenkins before configuration

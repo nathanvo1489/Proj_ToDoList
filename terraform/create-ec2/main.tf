@@ -23,12 +23,17 @@ resource "aws_instance" "app_server" {
   count = 3
 
   ami = data.aws_ami.ubuntu.id
-  # index=1 for server-build, it needs 4GiB RAM
-  instance_type = count.index == 1 ? "t3.medium" : "t3.small"
+  # index=0 for jenkins server build, it needs 4GiB RAM
+  # index=1 for FE server run, it needs 2GiB RAM
+  # index=2 for BE server run, it needs 4GiB RAM
+  instance_type = count.index == 1 ? "t3.small" : "t3.medium"
   key_name      = "devops"
 
+  # index=0 for jenkins server build, it needs 10GiB disk space
+  # index=1 for FE server run, it needs 10GiB disk space
+  # index=2 for BE server run, it needs 15GiB disk space
   root_block_device {
-    volume_size           = 10 #GiB
+    volume_size           = count.index == 2 ? 15 : 10 #GiB
     volume_type           = "gp3"
     encrypted             = false
     delete_on_termination = true
