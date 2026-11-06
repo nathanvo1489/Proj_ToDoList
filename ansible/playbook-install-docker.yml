@@ -2,6 +2,11 @@
   hosts: myhosts
   become: true
 
+  vars_prompt:
+      - name: github_pat
+        prompt: GitHub PAT for gh authentication
+        private: true
+
   tasks:
       # 1. Avoid the out-of-sync regional Ubuntu mirror
       - name: Find Ubuntu APT source files
@@ -109,8 +114,22 @@
             groups: docker
             append: true
 
-      # 11. Verify
+      # 11. Verify Docker installation
       - name: Verify Docker installation
         ansible.builtin.command:
             cmd: docker ps
+        changed_when: false
+
+      # 12. Authenticate GitHub CLI and verify the login
+      - name: Authenticate GitHub CLI
+        ansible.builtin.command:
+            cmd: gh auth login --hostname github.com --with-token
+            stdin: "{{ github_pat }}"
+        become_user: ubuntu
+        no_log: true
+
+      - name: Verify GitHub CLI authentication
+        ansible.builtin.command:
+            cmd: gh auth status
+        become_user: ubuntu
         changed_when: false

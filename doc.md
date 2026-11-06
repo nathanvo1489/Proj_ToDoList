@@ -34,6 +34,7 @@ sudo systemctl stop jenkins
 sudo cat /ver/lib/jenkins/secrets/initialAdminPassword
 
 #1- New Item for DockerHub example
+
 Pipeline:
 - Discard old builds -> max 5 keeps
 - Dont allow concurrent build
@@ -43,24 +44,23 @@ Pipeline:
 # TERRAFORM CLI
 ```bash
 # must run in the parent folder of 'terraform'
-docker run --name ubuntu-terraform -d -it -v ./terraform:/root/terraform ubuntu:latest
+docker run --name ubuntu-terraform -d -it -v ./terraform:/root/terraform ubuntu:26.04
 
 # open local terminal and login terraform ubuntu with terminal
 docker exec -it ubuntu-terraform bash
 
-# install terraform into /usr/local/bin/
+# in ubuntu-terraform machine, install terraform into /usr/local/bin/
 mv terraform /usr/local/bin/
 
 # install aws CLI, but need install curl first
 apt update && apt install -y curl unzip
-# goto folder 'aws' and run
-bash install.sh --system
 # install gnupg package for signature clarification of using aws cli
 apt-get update && apt-get install -y gnupg
+# goto folder 'aws-cli' and run
+bash install.sh --system
 
 # check version
-terraform --version
-aws --version
+terraform --version;aws --version
 
 aws configure
 
@@ -68,7 +68,7 @@ aws configure
 apt update && apt install -y less
 aws sts get-caller-identity
 
-# check syntax of the script
+# check syntax of the script, inside 'create-ec2'
 terraform fmt
 terraform init
 terraform validate
@@ -84,11 +84,10 @@ terraform destroy
 
 # ANSIBLE CLI
 ```bash
-docker run --name ubuntu-ansible -d -it -v ./ansible:/root/ansible ubuntu:latest
+docker run --name ubuntu-ansible -d -it -v ./ansible:/root/ansible ubuntu:26.04
 docker exec -it ubuntu-ansible bash
 
-apt update
-apt install software-properties-common
+apt update && apt install software-properties-common
 add-apt-repository --yes --update ppa:ansible/ansible
 apt install ansible
 
@@ -106,5 +105,7 @@ ssh -i "devops.pem" ubuntu@54.255.151.147
 ansible-playbook -i inventory.ini playbook-install-docker.yml
 ansible-playbook -i inventory.ini playbook-install-nginx.yml
 ansible-playbook -i inventory.ini playbook-install-jenkins.yml
+
+docker -v;nginx -v;jenkins -v
 
 ```

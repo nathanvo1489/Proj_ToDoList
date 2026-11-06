@@ -53,12 +53,3 @@
             name: nginx
             state: started
             enabled: true
-
-      - name: Deploy index.html
-        become: true
-        ansible.builtin.copy:
-            src: ./files/index.html
-            dest: /index.html
-            owner: root
-            group: root
-            mode: "777"
