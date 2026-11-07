@@ -120,14 +120,23 @@
             cmd: docker ps
         changed_when: false
 
-      # 12. Authenticate GitHub CLI and verify the login
+      # Step 12->14 to facilitate github login for user
+      # 12. Authenticate GitHub CLI
       - name: Authenticate GitHub CLI
         ansible.builtin.command:
             cmd: gh auth login --hostname github.com --with-token
             stdin: "{{ github_pat }}"
         become_user: ubuntu
         no_log: true
+      
+      #13. Configure Git credentials
+      - name: Configure Git to use GitHub CLI credentials
+        ansible.builtin.command:
+            cmd: gh auth setup-git --hostname github.com
+        become_user: ubuntu
+        changed_when: false
 
+      #14. Verify GitHub CLI authentication
       - name: Verify GitHub CLI authentication
         ansible.builtin.command:
             cmd: gh auth status

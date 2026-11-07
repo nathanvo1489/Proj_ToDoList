@@ -41,6 +41,16 @@ Pipeline:
 - Pipeline speed: performance
 - Trigger: GitHub hook
 
+#2- Create credentials
+- SSH username w private key: ssh-login
+- Username & pass (PAT): jenkins-github-login; jenkins-dockerhub-login
+- Secret text: ip-server-run-fe; ip-server-run-be
+
+![alt text](image-1.png)
+
+#3- Clone git repo in FE-server-run
+git clone https://github.com/nathanvo1489/ToDoList-FE.git
+
 # TERRAFORM CLI
 ```bash
 # must run in the parent folder of 'terraform'
