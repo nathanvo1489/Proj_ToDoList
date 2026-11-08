@@ -7,9 +7,8 @@ services:
       - 27017:27017
     volumes:
       - mongo_data:/data/db
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=12345
+    env_file:
+      - ../backend/.env
     # Healthcheck to ensure MongoDB is ready before starting backend services
     healthcheck:
       test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand({ping:1}).ok ? 0 : 1)"]
@@ -28,7 +27,7 @@ services:
     ports:
       - 8000:8001
     env_file:
-      - ../.env
+      - ../backend/.env
     depends_on:
       # mongodb must be healthy before starting the backend service
       mongodb:
@@ -44,7 +43,7 @@ services:
     ports:
       - 3001:80
     env_file:
-      - ../.env
+      - ../frontend/.env
     depends_on:
       - js_express_be
 
@@ -71,5 +70,4 @@ volumes:
   mongo_data:
     name: mongo_data
   # grafana_data:
-
 
