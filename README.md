@@ -45,6 +45,17 @@ example from teacher:
 
 CICD workflow in github action
 
-** chua gan IP cloudflare cho FE & BE, chua add domain nginx cho FE & BE **             
+## Terrform scripts usage
+In "terraform\create-ec2\main.tf", there are 2 separate scripts used for 1st run and 2nd run onwards when creating AWS EC2 machines
 
-3- server monitoring
+# 1st run
+Find comments with "...1st run..." and use those lines
+Line #44, Line #55->#88
+Comment-out codes with "...2nd run..."
+
+![alt text](image-1.png)
+
+# 2nd run onwards
+Find comments with "...2nd run..." and use those lines
+Line #17->#19, Line #46
+Comment-out codes with "...1st run..."

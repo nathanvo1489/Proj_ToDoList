@@ -24,6 +24,9 @@ db.users.find()
 # Xóa data
 db.users.deleteMany([{ name: "Nhat" },{ name: "Ken" }])
 
+use [ten_database]
+db.dropDatabase()
+
 # JENKINS
 
 sudo systemctl status jenkins
